@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "SRM Auto Login",
+  "version": "1.0",
+  "description": "Automatic login extension for SRM Student Portal with OCR captcha solving",
+  
+  "permissions": [
+    "storage",
+    "scripting",
+    "notifications"
+  ],
+  
+  "host_permissions": [
+    "https://student.srmap.edu.in/*"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["https://student.srmap.edu.in/srmapstudentcorner/HRDSystem*"],
+      "js": ["lib/tesseract.min.js", "crypto.js", "content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "options_page": "options.html",
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SRM Auto Login"
+  },
+
+  "icons": {
+    "16": "icons/icon.svg",
+    "48": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["lib/tesseract.min.js"],
+      "matches": ["https://student.srmap.edu.in/*"]
+    }
+  ]
+}

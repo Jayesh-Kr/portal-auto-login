@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRM Auto Login</title>
+    <style>
+        body {
+            width: 320px;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-dot.active {
+            background-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .status-dot.inactive {
+            background-color: #f44336;
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .primary-btn {
+            background: rgba(76, 175, 80, 0.8) !important;
+        }
+
+        .secondary-btn {
+            background: rgba(33, 150, 243, 0.8) !important;
+        }
+
+        .info-text {
+            font-size: 12px;
+            opacity: 0.8;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .quick-actions {
+            margin-top: 15px;
+        }
+
+        .quick-actions h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔐 SRM Auto Login</h1>
+    </div>
+
+    <div class="status-card">
+        <div class="status-indicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Checking status...</span>
+        </div>
+        <div id="statusDetails" style="font-size: 12px; opacity: 0.8;"></div>
+    </div>
+
+    <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="button-group">
+            <button id="configureBtn" class="primary-btn">⚙️ Configure Credentials</button>
+            <button id="testLoginBtn" class="secondary-btn">🧪 Test Login Page</button>
+            <button id="clearDataBtn">🗑️ Clear Stored Data</button>
+        </div>
+    </div>
+
+    <div class="info-text">
+        Extension will auto-login when you visit the SRM student portal
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
