@@ -17,7 +17,7 @@ A Chrome extension that automates login for SRM Student Portal with OCR-powered 
 1. **Download or Clone this repository**
 2. **Open Chrome** and navigate to `chrome://extensions/`
 3. **Enable Developer Mode** (toggle switch in top-right corner)
-4. **Click "Load unpacked"** and select the `my-extension` folder
+4. **Click "Load unpacked"** and select the `portal-auto-login` folder
 5. **Configure credentials** by clicking on the extension icon and selecting "Configure Credentials"
 
 ### Method 2: Installation from Chrome Web Store (Coming Soon)
