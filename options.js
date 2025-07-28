@@ -143,9 +143,18 @@ class OptionsManager {
    * Open SRM login page in new tab
    */
   openLoginPage() {
-    const loginUrl = 'https://student.srmap.edu.in/srmapstudentcorner/HRDSystem';
-    chrome.tabs.create({ url: loginUrl });
-    this.showStatus('🌐 Opening SRM login page...', 'success');
+    try {
+      const loginUrl = 'https://student.srmap.edu.in/srmapstudentcorner/HRDSystem';
+      if (chrome.tabs && chrome.tabs.create) {
+        chrome.tabs.create({ url: loginUrl });
+        this.showStatus('🌐 Opening SRM login page...', 'success');
+      } else {
+        this.showStatus('❌ Unable to open new tab', 'error');
+      }
+    } catch (error) {
+      console.error('Error opening login page:', error);
+      this.showStatus('❌ Error opening login page', 'error');
+    }
   }
 
   /**

@@ -7,7 +7,9 @@
   "permissions": [
     "storage",
     "scripting",
-    "notifications"
+    "notifications",
+    "tabs",
+    "activeTab"
   ],
   
   "host_permissions": [
@@ -44,5 +46,9 @@
       "resources": ["lib/tesseract.min.js"],
       "matches": ["https://student.srmap.edu.in/*"]
     }
-  ]
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
 }

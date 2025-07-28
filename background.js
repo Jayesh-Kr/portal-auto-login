@@ -3,10 +3,21 @@
  * Handles extension lifecycle and provides support for content scripts
  */
 
+// Service Worker compatibility check
+if (typeof chrome !== 'undefined' && chrome.runtime) {
+  console.log('🔧 SRM Auto Login - Background Service Worker Starting');
+} else {
+  console.error('❌ Chrome runtime not available');
+}
+
 class BackgroundService {
   constructor() {
-    this.initializeEventListeners();
-    console.log('🔧 SRM Auto Login - Background Service Started');
+    try {
+      this.initializeEventListeners();
+      console.log('✅ SRM Auto Login - Background Service Started');
+    } catch (error) {
+      console.error('❌ Background service initialization failed:', error);
+    }
   }
 
   /**
@@ -14,25 +25,33 @@ class BackgroundService {
    */
   initializeEventListeners() {
     // Handle extension installation/update
-    chrome.runtime.onInstalled.addListener((details) => {
-      this.handleInstallation(details);
-    });
+    if (chrome.runtime && chrome.runtime.onInstalled) {
+      chrome.runtime.onInstalled.addListener((details) => {
+        this.handleInstallation(details);
+      });
+    }
 
     // Handle messages from content scripts
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      this.handleMessage(message, sender, sendResponse);
-      return true; // Keep message channel open for async response
-    });
+    if (chrome.runtime && chrome.runtime.onMessage) {
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        this.handleMessage(message, sender, sendResponse);
+        return true; // Keep message channel open for async response
+      });
+    }
 
     // Handle tab updates to inject content script if needed
-    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-      this.handleTabUpdate(tabId, changeInfo, tab);
-    });
+    if (chrome.tabs && chrome.tabs.onUpdated) {
+      chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+        this.handleTabUpdate(tabId, changeInfo, tab);
+      });
+    }
 
     // Handle extension startup
-    chrome.runtime.onStartup.addListener(() => {
-      console.log('🚀 Extension startup detected');
-    });
+    if (chrome.runtime && chrome.runtime.onStartup) {
+      chrome.runtime.onStartup.addListener(() => {
+        console.log('🚀 Extension startup detected');
+      });
+    }
   }
 
   /**
@@ -56,24 +75,34 @@ class BackgroundService {
   async handleFirstInstall() {
     console.log('🎉 First time installation detected');
 
-    // Open options page on first install
-    chrome.tabs.create({
-      url: chrome.runtime.getURL('options.html')
-    });
+    try {
+      // Open options page on first install
+      if (chrome.tabs && chrome.tabs.create) {
+        await chrome.tabs.create({
+          url: chrome.runtime.getURL('options.html')
+        });
+      }
 
-    // Show welcome notification
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon.svg',
-      title: 'SRM Auto Login Installed!',
-      message: 'Configure your credentials in the options page to get started.'
-    });
+      // Show welcome notification
+      if (chrome.notifications && chrome.notifications.create) {
+        await chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon.svg',
+          title: 'SRM Auto Login Installed!',
+          message: 'Configure your credentials in the options page to get started.'
+        });
+      }
 
-    // Set installation timestamp
-    await chrome.storage.local.set({
-      installedAt: Date.now(),
-      version: chrome.runtime.getManifest().version
-    });
+      // Set installation timestamp
+      if (chrome.storage && chrome.storage.local) {
+        await chrome.storage.local.set({
+          installedAt: Date.now(),
+          version: chrome.runtime.getManifest().version
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error during first install:', error);
+    }
   }
 
   /**

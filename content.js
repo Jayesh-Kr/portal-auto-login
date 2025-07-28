@@ -560,3 +560,27 @@ class SRMAutoLogin {
   
   window.srmAutoLoginInstance = new SRMAutoLogin();
 })();
+
+// Listen for messages from popup/background scripts
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('📨 Content script received message:', message);
+  
+  try {
+    if (message.action === 'triggerAutoLogin') {
+      // Trigger auto-login manually
+      if (window.srmAutoLoginInstance) {
+        window.srmAutoLoginInstance.startAutoLogin();
+        sendResponse({ success: true, message: 'Auto-login triggered' });
+      } else {
+        sendResponse({ success: false, error: 'Auto-login instance not found' });
+      }
+    } else {
+      sendResponse({ success: false, error: 'Unknown action: ' + message.action });
+    }
+  } catch (error) {
+    console.error('❌ Error handling message:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+  
+  return true; // Keep message channel open for async response
+});

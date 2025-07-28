@@ -124,22 +124,35 @@ class PopupManager {
         return;
       }
 
+      // Check if tab is on SRM login page
+      if (!currentTab.url || !currentTab.url.includes('student.srmap.edu.in/srmapstudentcorner/HRDSystem')) {
+        this.showError('Please navigate to SRM login page first');
+        return;
+      }
+
       // Send message to content script to trigger auto-login
-      await chrome.tabs.sendMessage(currentTab.id, {
+      const response = await chrome.tabs.sendMessage(currentTab.id, {
         action: 'triggerAutoLogin'
       });
 
-      // Show success message
-      this.showSuccess('Auto-login triggered!');
-      
-      // Close popup after a delay
-      setTimeout(() => {
-        window.close();
-      }, 1500);
+      if (response && response.success) {
+        this.showSuccess('Auto-login triggered!');
+        
+        // Close popup after a delay
+        setTimeout(() => {
+          window.close();
+        }, 1500);
+      } else {
+        this.showError('Failed to trigger auto-login: ' + (response?.error || 'Unknown error'));
+      }
 
     } catch (error) {
       console.error('Error triggering auto-login:', error);
-      this.showError('Failed to trigger auto-login');
+      if (error.message.includes('Could not establish connection')) {
+        this.showError('Content script not loaded. Please refresh the page and try again.');
+      } else {
+        this.showError('Failed to trigger auto-login: ' + error.message);
+      }
     }
   }
 
