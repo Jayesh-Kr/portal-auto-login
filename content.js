@@ -164,50 +164,149 @@ class SRMAutoLogin {
    */
   async solveCaptcha() {
     try {
-      console.log('🔍 Looking for captcha image...');
+      console.log('🔍 Getting captcha image from direct URL...');
       
-      // Find captcha image
-      const captchaImg = this.findCaptchaImage();
+      // Get captcha image from direct URL
+      const captchaImg = await this.getCaptchaImage();
       if (!captchaImg) {
-        console.log('⚠️ No captcha image found, proceeding without captcha...');
+        console.log('⚠️ No captcha image available, proceeding without captcha...');
         return true;
       }
 
-      console.log('🖼️ Captcha image found, converting to base64...');
+      console.log('🖼️ Captcha image loaded, converting to base64...');
       const imageData = await this.imageToBase64(captchaImg);
       
       console.log('🤖 Running OCR on captcha...');
       const ocrResult = await this.performOCR(imageData);
       
       if (ocrResult.confidence < this.ocrConfidenceThreshold) {
-        console.log(`⚠️ OCR confidence too low: ${ocrResult.confidence}`);
+        console.log(`⚠️ OCR confidence too low: ${(ocrResult.confidence * 100).toFixed(1)}%`);
+        this.showNotification(`Captcha OCR confidence low (${(ocrResult.confidence * 100).toFixed(1)}%). Please solve manually.`, 'warning');
         return false;
       }
 
-      console.log(`✅ OCR successful: "${ocrResult.text}" (confidence: ${ocrResult.confidence})`);
+      console.log(`✅ OCR successful: "${ocrResult.text}" (confidence: ${(ocrResult.confidence * 100).toFixed(1)}%)`);
       
       // Fill captcha field
       const captchaField = this.findCaptchaField();
       if (captchaField) {
         this.setInputValue(captchaField, ocrResult.text);
         console.log('✅ Captcha filled');
+        this.showNotification(`Captcha solved: ${ocrResult.text}`, 'success');
         return true;
       } else {
         console.log('❌ Captcha input field not found');
+        this.showNotification('Captcha input field not found on page', 'error');
         return false;
       }
 
     } catch (error) {
       console.error('❌ Captcha solving failed:', error);
+      this.showNotification('Captcha solving failed: ' + error.message, 'error');
       return false;
     }
   }
 
   /**
-   * Find captcha image element
+   * Get captcha image from direct URL
    */
-  findCaptchaImage() {
-    // Common selectors for captcha images
+  async getCaptchaImage() {
+    try {
+      console.log('🔗 Fetching captcha from direct URL...');
+      
+      // Try method 1: Direct image loading
+      try {
+        const img = await this.loadImageDirectly();
+        return img;
+      } catch (error) {
+        console.log('⚠️ Direct image loading failed, trying fetch method...');
+      }
+      
+      // Try method 2: Fetch as blob and create object URL
+      try {
+        const img = await this.loadImageViaFetch();
+        return img;
+      } catch (error) {
+        console.log('⚠️ Fetch method failed, trying page search as fallback...');
+      }
+      
+      // Try method 3: Fallback to finding image on page
+      return this.findCaptchaImageOnPage();
+      
+    } catch (error) {
+      console.error('❌ Error getting captcha image:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Load image directly with cross-origin settings
+   */
+  async loadImageDirectly() {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        console.log('✅ Captcha image loaded via direct method');
+        resolve(img);
+      };
+      
+      img.onerror = (error) => {
+        reject(new Error('Direct image loading failed'));
+      };
+
+      img.src = `https://student.srmap.edu.in/srmapstudentcorner/captchas`;
+    });
+  }
+
+  /**
+   * Load image via fetch API
+   */
+  async loadImageViaFetch() {
+    try {
+      const response = await fetch(`https://student.srmap.edu.in/srmapstudentcorner/captchas`, {
+        method: 'GET',
+        credentials: 'include', // Include cookies for authentication
+        headers: {
+          'Accept': 'image/*',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
+      const objectURL = URL.createObjectURL(blob);
+      
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          console.log('✅ Captcha image loaded via fetch method');
+          // Clean up object URL after loading
+          URL.revokeObjectURL(objectURL);
+          resolve(img);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectURL);
+          reject(new Error('Failed to load image from blob'));
+        };
+        img.src = objectURL;
+      });
+      
+    } catch (error) {
+      console.error('Fetch method error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fallback: Find captcha image on the page
+   */
+  findCaptchaImageOnPage() {
+    console.log('🔍 Falling back to searching for captcha on page...');
+    
     const captchaSelectors = [
       'img[src*="captcha"]',
       'img[src*="Captcha"]',

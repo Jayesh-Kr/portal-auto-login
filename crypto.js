@@ -45,7 +45,7 @@ class CryptoHelper {
    * @param {string} masterPassword - Master password (optional, uses default)
    * @returns {Promise<Object>} - Encrypted data with IV and salt
    */
-  async encrypt(text, masterPassword = 'srm-auto-login-key-2024') {
+  async encrypt(text, masterPassword = 'srm-auto-login-key-2025') {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
     
@@ -76,7 +76,7 @@ class CryptoHelper {
    * @param {string} masterPassword - Master password (optional, uses default)
    * @returns {Promise<string>} - Decrypted text
    */
-  async decrypt(encryptedData, masterPassword = 'srm-auto-login-key-2024') {
+  async decrypt(encryptedData, masterPassword = 'srm-auto-login-key-2025') {
     const { encrypted, iv, salt } = encryptedData;
     
     // Convert arrays back to Uint8Array
